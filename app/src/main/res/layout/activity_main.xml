@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/ivLogo"
+        android:layout_width="match_parent"
+        android:layout_height="270dp"
+        android:padding="10dp"
+        android:layout_margin="20dp"
+        android:layout_marginTop="150dp"
+        android:src="@drawable/logo" />
+
+    <TextView
+        android:id="@+id/tvName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textSize="50sp"
+        android:layout_marginTop="15dp"
+        android:text="Dark Patterns Buster" />
+    
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btnSignin"
+            android:layout_width="378dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:textSize="20sp"
+            android:text="Sign in" />
+
+        <Button
+            android:id="@+id/btnRegister"
+            android:layout_width="378dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_margin="20dp"
+            android:layout_gravity="center"
+            android:textSize="20sp"
+            android:text="Register" />
+
+        <Button
+            android:id="@+id/createBtn"
+            android:layout_width="378dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:textSize="20sp"
+            android:text="Setup Floating Widget"
+            android:textColor="@android:color/white" />
+
+<!--        <Button-->
+<!--            android:id="@+id/btnExplore"-->
+<!--            android:layout_width="378dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:textSize="20sp"-->
+<!--            android:text="Explore" />-->
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvCreator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textStyle="italic"
+        android:text="A MindsinMotion Product" />
+
+
+</LinearLayout>
