@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#F4F4F4"
     tools:context=".MainActivity">
 
     <ImageView
@@ -14,7 +14,8 @@
         android:padding="10dp"
         android:layout_margin="20dp"
         android:layout_marginTop="150dp"
-        android:src="@drawable/logo" />
+        android:src="@drawable/logo"
+        android:contentDescription="@string/dps_logo" />
 
     <TextView
         android:id="@+id/tvName"
@@ -26,7 +27,7 @@
         android:textStyle="bold"
         android:textSize="50sp"
         android:layout_marginTop="15dp"
-        android:text="Dark Patterns Buster" />
+        android:text="@string/dark_patterns_shield" />
     
 
     <LinearLayout
@@ -35,13 +36,13 @@
         android:orientation="vertical">
 
         <Button
-            android:id="@+id/btnSignin"
+            android:id="@+id/btn_sign_in"
             android:layout_width="378dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_gravity="center"
             android:textSize="20sp"
-            android:text="Sign in" />
+            android:text="@string/sign_in" />
 
         <Button
             android:id="@+id/btnRegister"
@@ -51,7 +52,7 @@
             android:layout_margin="20dp"
             android:layout_gravity="center"
             android:textSize="20sp"
-            android:text="Register" />
+            android:text="@string/register" />
 
         <Button
             android:id="@+id/createBtn"
@@ -60,7 +61,7 @@
             android:layout_weight="1"
             android:layout_gravity="center"
             android:textSize="20sp"
-            android:text="Setup Floating Widget"
+            android:text="@string/setup_floating_widget"
             android:textColor="@android:color/white" />
 
 <!--        <Button-->
@@ -81,7 +82,15 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:textStyle="italic"
-        android:text="A MindsinMotion Product" />
+        android:text="@string/a_mindsinmotion_product" />
+
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="tester"-->
+<!--        android:id="@+id/fa"-->
+<!--        />-->
+
 
 
 </LinearLayout>

@@ -1,9 +1,8 @@
 package com.example.portfolio
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.provider.Settings
 import android.os.Bundle
 import android.widget.Button
@@ -12,43 +11,55 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
-//    private val APP_PERMISSION_REQUEST = 2002
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                // Accessibility settings were updated, check again and start the service if enabled
+                if (isAccessibilityServiceEnabled(this, "com.example.portfolio/.MyAccessibilityService")) {
+                    startService(Intent(this, FloatWidgetService::class.java))
+                    finish()
+                } else {
+                    Toast.makeText(this, "Accessibility permission not granted", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         val buttonRegister = findViewById<Button>(R.id.btnRegister)
-        buttonRegister.setOnClickListener{
-            intent = Intent(this,RegisterActivity::class.java)
+        buttonRegister.setOnClickListener {
+            val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
 
-        if (!Settings.canDrawOverlays(this)) {
-            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
-            requestPermissionLauncher.launch(intent)
-        } else {
-            initializeView()
+        val buttonWidget = findViewById<Button>(R.id.createBtn)
+        buttonWidget.setOnClickListener {
+            val intent = Intent(this,FloatWidgetService::class.java)
+            startService(intent)
         }
 
-    }
-
-    private fun initializeView() {
-        val mButton: Button = findViewById(R.id.createBtn)
-        mButton.setOnClickListener {
-            startService(Intent(this@MainActivity, FloatWidgetService::class.java))
+        // Check if accessibility service is enabled when the app is opened
+        if (!isAccessibilityServiceEnabled(this, "com.example.portfolio/.MyAccessibilityService")) {
+            // Accessibility service permission is not granted, open accessibility settings
+            val accessibilityIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+            requestPermissionLauncher.launch(accessibilityIntent)
+        } else {
+            // Accessibility service is enabled, start the FloatWidgetService
+            startService(Intent(this, FloatWidgetService::class.java))
             finish()
         }
     }
 
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                // The user granted the overlay permission
-                initializeView()
-            } else {
-                Toast.makeText(this, "Overlay permission not granted", Toast.LENGTH_SHORT).show()
-            }
-        }
+    private fun isAccessibilityServiceEnabled(context: Context, serviceName: String): Boolean {
+        val contentResolver = context.contentResolver
+        val enabledServices = Settings.Secure.getString(
+            contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        )
+
+        return enabledServices?.contains(serviceName) == true
+    }
 }
-
-
-

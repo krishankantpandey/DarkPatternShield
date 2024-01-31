@@ -1,12 +1,16 @@
 <resources>
-    <string name="app_name">DarkPatternShield</string>
+    <string name="app_name">Dark Pattern Shield</string>
     <string name="title_activity_register">Register</string>
     <string name="title_activity_explore">ExploreActivity</string>
+    <string name="nftitle">Dark Pattern Detected</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+
+    <string name="accessibility_service_label" >accessability</string>
+    <string name="accessibility_service_description">text reader</string>
 
     <string name="ia">
         It means falsely stating or implying the sense of urgency or scarcity so as to mislead a user into making an immediate purchase or take an immediate action, which may lead to a purchase; including:\n\n
@@ -116,4 +120,10 @@ a. Websites asking a user to download their app, again and again\n
 b. Platforms asking users to give their phone numbers for supposedly security purposes\n
 c. Constant request to turn on notifications with no option to say “NO”.
     </string>
+    <string name="dark_patterns_shield">Dark Patterns Shield</string>
+    <string name="dps_logo">DPS Logo</string>
+    <string name="sign_in">Sign in</string>
+    <string name="register">Register</string>
+    <string name="setup_floating_widget">Setup Floating Widget</string>
+    <string name="a_mindsinmotion_product">A MindsinMotion Product</string>
 </resources>

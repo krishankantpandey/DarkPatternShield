@@ -2,104 +2,115 @@ package com.example.portfolio
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.content.Intent
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import com.example.portfolio.ml.KerasfC
+import org.tensorflow.lite.DataType
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 
 class MyAccessibilityService : AccessibilityService() {
+    private val textViewsText = mutableListOf<String>()
+    override fun onAccessibilityEvent(event: AccessibilityEvent) {
 
-    private val info: AccessibilityServiceInfo = AccessibilityServiceInfo()
+        val source: AccessibilityNodeInfo = event.source ?: return
+        readTextViews(source, textViewsText)
 
-    fun retrieveTextFromScreen() {
-        val rootNode = rootInActiveWindow ?: return
+//         Calling Model Class
+        val intent = Intent(this, ModelInferenceManager::class.java)
+        intent.putExtra("text_data", ArrayList(textViewsText))
+        startService(intent)
 
-        // Call the traverse function starting from the root node
-        traverseAndRetrieveText(rootNode)
-    }
-
-    private fun traverseAndRetrieveText(node: AccessibilityNodeInfo) {
-        // Check if the node is a TextView or Button and has non-empty text
-        if ((node.className == "android.widget.TextView" || node.className == "android.widget.Button")
-            && node.text != null && !node.text.toString().isEmpty()
-        ) {
-            Log.i("Text on Screen", node.text.toString())
-        }
-
-        // Recursively traverse child nodes
-        for (i in 0 until node.childCount) {
-            traverseAndRetrieveText(node.getChild(i))
+        for (text in textViewsText) {
+            Log.d("out", text)
         }
     }
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        val source = event?.source ?: return
-
-        traverseAndPrintText(source, 0)
-    }
-
-        private fun traverseAndPrintText(node: AccessibilityNodeInfo, level: Int) {
-            if (node.className == "android.widget.TextView" && node.text != null && !node.text.toString().isEmpty()) {
-                val indent = "  ".repeat(level)
-                Log.i("Text on Screen", "$indent${node.text}")
-
-                // If you want to map text with resource id
-                val resourceId = getResourceId(node)
-                if (resourceId != null) {
-                    Log.i("Resource ID", "$indent$resourceId")
-                    // Here, you can store the text and its corresponding resource id for future use
-                }
-            }
-
-            for (i in 0 until node.childCount) {
-                traverseAndPrintText(node.getChild(i), level + 1)
-            }
-        }
-
-        private fun getResourceId(node: AccessibilityNodeInfo): String? {
-            val resourceIdEntryName = node.viewIdResourceName
-            return if (resourceIdEntryName != null) {
-                // Extracting the resource id from the entry name
-                val parts = resourceIdEntryName.split("/")
-                if (parts.size == 2) {
-                    parts[1]
-                } else {
-                    null
-                }
-            } else {
-                null
-            }
-        }
-
-
 
     override fun onInterrupt() {
-        // Handle interruptions, if needed
+
+    }
+    private fun readTextViews(nodeInfo: AccessibilityNodeInfo, textViewsText: MutableList<String>) {
+        if (nodeInfo.text != null) {
+            textViewsText.add(nodeInfo.text.toString())
+        }
+
+        for (i in 0 until nodeInfo.childCount) {
+            val childNodeInfo = nodeInfo.getChild(i)
+            if (childNodeInfo != null) {
+                readTextViews(childNodeInfo, textViewsText)
+            }
+        }
     }
 
     override fun onServiceConnected() {
-        info.apply {
-            // Set the type of events that this service wants to listen to. Others
-            // aren't passed to this service.
-            eventTypes = AccessibilityEvent.TYPE_VIEW_CLICKED or AccessibilityEvent.TYPE_VIEW_FOCUSED or AccessibilityEvent.TYPE_WINDOWS_CHANGED or AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED or AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+        super.onServiceConnected()
 
-            // If you only want this service to work with specific apps, set their
-            // package names here. Otherwise, when the service is activated, it
-            // listens to events from all apps.
-            packageNames = arrayOf("com.example.android.myFirstApp", "com.example.android.mySecondApp")
+        val serviceInfo = serviceInfo
+        serviceInfo.flags =
+//            AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS or
+                AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or
+               AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
+        serviceInfo.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED or
+                AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED or
+                AccessibilityEvent.TYPE_WINDOWS_CHANGED or
+                AccessibilityEvent.TYPE_VIEW_CLICKED
 
-            // Set the type of feedback your service provides.
-            feedbackType = AccessibilityServiceInfo.FEEDBACK_SPOKEN
 
-            // Default services are invoked only if no package-specific services are
-            // present for the type of AccessibilityEvent generated. This service is
-            // app-specific, so the flag isn't necessary. For a general-purpose
-            // service, consider setting the DEFAULT flag.
+        serviceInfo.packageNames = arrayOf<String>("com.example.portfolio",
+            "com.amazon.android","com.tul.tatacliq", "com.meesho.supply","com.flipkart.android",
+            "com.myntra.android", "com.snapdeal.main")
+//        serviceInfo.notificationTimeout = 0;
+        setServiceInfo(serviceInfo)
+    }
 
-            // flags = AccessibilityServiceInfo.DEFAULT;
+    private fun preProcess(textData: List<String>): FloatArray {
+        return textData.map { cleanText(it) }
+            .map { tokenizeAndVectorize(it) }
+            .flatten()
+            .toFloatArray()
+    }
 
-            notificationTimeout = 100
+    private fun cleanText(text: String): String {
+        var cleanedText = text.lowercase()
+
+        val badSymbolsRegex = Regex("[\\p{Punct}&&[^-]]")
+        cleanedText = badSymbolsRegex.replace(cleanedText, "")
+
+        cleanedText = cleanedText.replace("x", "")
+
+        val stopWords = setOf("the", "a", "an", "in", "on", "of")
+        cleanedText = cleanedText.split(" ").filterNot { it in stopWords }.joinToString(" ")
+
+        return cleanedText
+    }
+
+    private fun tokenizeAndVectorize(text: String): List<Float> {
+
+        val words = text.split("\\s+".toRegex())
+
+        val wordIndexMap = mutableMapOf<String, Int>()
+        var index = 0
+
+        for (word in words) {
+            if (!wordIndexMap.containsKey(word)) {
+                wordIndexMap[word] = index
+                index++
+            }
         }
 
-        this.serviceInfo = info
 
+        val wordIndices = words.map { wordIndexMap[it] ?: -1 }
+
+        val vectorizedText = wordIndices.map { wordIndex ->
+            val oneHotVector = FloatArray(index) { 0f }
+            if (wordIndex != -1) {
+                oneHotVector[wordIndex] = 1f
+            }
+            oneHotVector.toList()
+        }.flatten()
+
+        return vectorizedText
     }
 }
+
